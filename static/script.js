@@ -1,29 +1,27 @@
-btn.onclick = async () => {
-    const message = input.value.trim();
-    if (!message) return;
-    chatBox.innerHTML += `<div class="message user">You: ${message}</div>`;
-    input.value = "";
+const chatBox = document.getElementById("chat-box");
+const userInput = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
+let session_id = "";
 
-    try {
-        const form = new FormData();
-        form.append("message", message);
-        form.append("session_id", session_id);
+sendBtn.addEventListener("click", async () => {
+  const message = userInput.value;
+  if (!message) return;
 
-        const res = await fetch("/chat", {
-            method: "POST",
-            body: form
-        });
+  chatBox.innerHTML += `<div class="user-msg">${message}</div>`;
 
-        if (!res.ok) {
-            chatBox.innerHTML += `<div class="message bot">Error: ${res.statusText}</div>`;
-            return;
-        }
+  const formData = new FormData();
+  formData.append("message", message);
+  formData.append("session_id", session_id);
 
-        const data = await res.json();
-        session_id = data.session_id;
-        chatBox.innerHTML += `<div class="message bot">Bot: ${data.reply}</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-    } catch (err) {
-        chatBox.innerHTML += `<div class="message bot">Error: ${err}</div>`;
-    }
-};
+  const res = await fetch("/chat", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+  session_id = data.session_id;
+
+  chatBox.innerHTML += `<div class="bot-msg">${data.reply}</div>`;
+  chatBox.scrollTop = chatBox.scrollHeight;
+  userInput.value = "";
+});
